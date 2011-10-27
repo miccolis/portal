@@ -15,16 +15,42 @@ ddoc =
 
 ddoc.views = {};
 
-ddoc.views.tags = {
+ddoc.views.facet_publisher = {
     map: function(doc) {
-        if(doc._id.match(/^dataset\//)) {
-            doc.tags.forEach(function(d){
-                emit(d, null);
-        });
-       }
+        if(doc._id.match(/^dataset\//) && doc.author) {
+            emit(doc.author, null);
+        }
     },
     reduce: "_count"
 };
+ddoc.views.facet_tags = {
+    map: function(doc) {
+        if(doc._id.match(/^dataset\//) && doc.tags) {
+            doc.tags.forEach(function(d){
+                emit(d, null);
+            });
+        }
+    },
+    reduce: "_count"
+};
+ddoc.views.facet_format = {
+    map: function(doc) {
+        if(doc._id.match(/^dataset\//) && doc.resources) {
+            // TODO
+        }
+    },
+    reduce: "_count"
+};
+ddoc.views.facet_license = {
+    map: function(doc) {
+        if(doc._id.match(/^dataset\//) && doc.license) {
+            emit(doc.license, null);
+        }
+    },
+    reduce: "_count"
+};
+
+
 
 ddoc.validate_doc_update = function (newDoc, oldDoc, userCtx) {   
   if (newDoc._deleted === true && userCtx.roles.indexOf('_admin') === -1) {

@@ -201,6 +201,12 @@ models.Resource = Backbone.Model.extend({
     }
 });
 
+models.Facet = Backbone.Model.extend({
+    url: function() {
+        return rootPath + '/_design/app/_view/facet_' + this.id;
+    }
+})
+
 var views = {};
 
 views.Package = Backbone.View.extend();
@@ -221,9 +227,21 @@ views.Catalog = Backbone.View.extend({
 var App = Backbone.Router.extend({
     routes: {
         '': 'home',
+        'search': 'search'
         'catalog/:id': 'package'
     },
     home: function() {
+        var facets = {};
+        ['publisher', 'tag', 'format', 'license'].forEach(function(att) {
+            facets[attr] = new models.Facet({id: att});
+        });
+        new views.Home({
+            el: $('#main')
+            facets: facets;
+        });
+        _(facets).invoke('fetch');
+    }
+    search: function() {
         var collection = new models.Packages();
         new views.Catalog({
             el: $('#main'),
