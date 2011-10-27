@@ -1,9 +1,64 @@
+
+h1,
+h2 {
+  font-family: serif;
+  line-height: 60px;
+  font-size: 40px;
+  }
+
+.loading {
+  background: url('ajax-loader.gif') 50% 50% no-repeat;
+  }
+
 #banner {
   height: 60px;
   background-color: #2d2d2d;
-}
+  }
 
 #wrapper {
   width: 960px;
   margin: 0px auto;
-}
+  }
+
+#header {
+  height: 60px;
+  padding: 20px;
+  border-bottom: 1px solid #2d2d2d;
+  }
+  #header h1 {
+    float: left;
+    width: 700px;
+    }
+  #header .tagline {
+    float: right;
+    width: 220px;
+    }
+
+.search {
+  float: left;
+  width: 958px; 
+  border: 1px solid #2d2d2d;
+  padding: 20px 0px;
+  text-align: center;
+  }
+  .search input {
+    line-height: 30px;
+    font-size: 14px;
+    border: 1px solid #2d2d2d;
+    padding: 0px 10px;
+    }
+    .search input.text-input {
+      width: 280px;
+      }
+
+.facets-teaser .facet {
+  width: 200px;
+  padding: 20px;
+  float: left;
+  }
+  .facets-teaser .facet h3 {
+    border-bottom: 1px solid #4d4d4d;
+    }
+  .facets-teaser .facet > div {
+    height: 200px;
+    }

@@ -218,7 +218,6 @@ views.Catalog = Backbone.View.extend({
         this.collection.bind('all', function() { view.render(); });
     },
     render: function() {
-        debugger;
         return this;
     }
 });
