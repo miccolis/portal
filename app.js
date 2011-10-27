@@ -36,7 +36,9 @@ ddoc.views.facet_tag = {
 ddoc.views.facet_format = {
     map: function(doc) {
         if(doc._id.match(/^dataset\//) && doc.resources) {
-            // TODO
+            doc.resources.forEach(function(v) {
+                emit(v.format, null)
+            });
         }
     },
     reduce: "_count"
