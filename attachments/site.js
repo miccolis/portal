@@ -54,6 +54,7 @@ rootPath = rootPath[1];
 
 // Begin Backbone setup.
 var models = {};
+
 models.Package = Backbone.Model.extend({
     url: function() {
         return rootPath + this.id;
@@ -203,11 +204,38 @@ models.Resource = Backbone.Model.extend({
 
 models.Facet = Backbone.Model.extend({
     url: function() {
-        return rootPath + '/_design/app/_view/facet_' + this.id;
+        return rootPath + '_design/app/_view/facet_' + encodeURIComponent(this.id) +'?group=true';
     }
 })
 
 var views = {};
+
+views.Facets = Backbone.View.extend({
+    initialize: function() {
+        _.bindAll(this, 'render');
+        var view = this;
+        this.model.bind('all', function() { view.render(); });
+    },
+    render: function() {
+        $('div.loading', this.el)
+            .removeClass('loading')
+            .empty()
+            .html(templates.facets({rows: this.model.get('rows')}));
+
+        return this;
+    }
+});
+
+views.Home = Backbone.View.extend({
+    initialize: function() {
+        _(this.options.facets).each(function(v, i) {
+              new views.Facets({
+                el: $('.facets-teaser .facet-' + i),
+                model: v
+              });
+        });
+    }
+});
 
 views.Package = Backbone.View.extend();
 
@@ -222,24 +250,23 @@ views.Catalog = Backbone.View.extend({
     }
 });
 
-
 var App = Backbone.Router.extend({
     routes: {
         '': 'home',
-        'search': 'search'
+        'search': 'search',
         'catalog/:id': 'package'
     },
     home: function() {
         var facets = {};
         ['publisher', 'tag', 'format', 'license'].forEach(function(att) {
-            facets[attr] = new models.Facet({id: att});
+            facets[att] = new models.Facet({id: att});
         });
         new views.Home({
-            el: $('#main')
-            facets: facets;
+            el: $('#main'),
+            facets: facets
         });
-        _(facets).invoke('fetch');
-    }
+        _(facets).each(function(m) { m.fetch(); });
+    },
     search: function() {
         var collection = new models.Packages();
         new views.Catalog({

@@ -23,7 +23,7 @@ ddoc.views.facet_publisher = {
     },
     reduce: "_count"
 };
-ddoc.views.facet_tags = {
+ddoc.views.facet_tag = {
     map: function(doc) {
         if(doc._id.match(/^dataset\//) && doc.tags) {
             doc.tags.forEach(function(d){
