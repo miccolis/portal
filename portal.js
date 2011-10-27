@@ -50,6 +50,10 @@ if (command == 'push') {
     });
 }
 
+/**
+ * Import data into CouchDB. This command expects `.json` files in a `data`
+ * directory. Try http://catalogue.data.gov.uk/dump/
+ */
 if (command == 'import') {
     var dir = path.join(__dirname, 'data');
     fs.readdir(dir, function(error, files) {
