@@ -220,7 +220,10 @@ views.Facets = Backbone.View.extend({
         $('div.loading', this.el)
             .removeClass('loading')
             .empty()
-            .html(templates.facets({rows: this.model.get('rows')}));
+            .html(templates.facets({
+                id: this.model.id,
+                rows: this.model.get('rows')
+            }));
 
         return this;
     }
