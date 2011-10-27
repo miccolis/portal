@@ -1,0 +1,17 @@
+{
+  "author": "Jeff Miccolis <jeff@miccolis.net>",
+  "name": "portal",
+  "description": "Data Catalog",
+  "version": "0.0.0",
+  "repository": {
+    "url": ""
+  },
+  "engines": {
+    "node": "~v0.4.9"
+  },
+  "dependencies": {
+    "couchapp": "= 0.8.1",
+    "underscore": "= 1.2.0"
+  },
+  "devDependencies": {}
+}

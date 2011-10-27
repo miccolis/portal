@@ -1,0 +1,22 @@
+<h2><%= title %></h2>
+<div>
+uri
+version
+</div>
+
+<div>
+Tags
+Groups
+Notes
+</div>
+
+
+<div>
+Author
+Maintainer
+License
+</div>
+
+<div>
+Resources
+</div>

@@ -1,0 +1,9 @@
+#banner {
+  height: 60px;
+  background-color: #2d2d2d;
+}
+
+#wrapper {
+  width: 960px;
+  margin: 0px auto;
+}
