@@ -59,6 +59,19 @@ models.Package = Backbone.Model.extend({
     url: function() {
         return rootPath + this.id;
     },
+    renderer: function() {
+        var model = this;
+        return {
+          // Print
+          p: function(attr) { return model.escape(attr); },
+          // Raw
+          r: function(attr) { return model.get(attr); },
+          // Label
+          l: function(attr) { return attr; },
+          // Description
+          d: function(attr) { return model.schema.properties[attr].description; }
+        };
+    },
     schema: {
         name: 'package',
         properties: {
@@ -147,9 +160,25 @@ models.Package = Backbone.Model.extend({
 
 models.Packages = Backbone.Collection.extend({
     model: models.Package,
-    url: rootPath + '/_all_docs?include_docs=true',
+    url: rootPath + '_all_docs?include_docs=true',
     parse: function(resp) {
         return _(resp.rows).pluck('doc');
+    },
+    initialize: function(models, options) {
+        var options = options || {};
+        if (options.filter && options.value) {
+            var filters = ['tag', 'author', 'format', 'license'];
+            var pos = filters.indexOf(options.filter);
+            if (pos === -1) return; // TODO Fail harder.
+
+            var url = rootPath +'_design/app/_view/facet_' + filters[pos] +'?';
+            url += [
+                'reduce=false',
+                'include_docs=true',
+                'key="'+ encodeURIComponent(options.value)+'"'
+            ].join('&');
+            this.url = url;
+        }
     }
 });
 
@@ -230,13 +259,15 @@ views.Facets = Backbone.View.extend({
 });
 
 views.Home = Backbone.View.extend({
-    initialize: function() {
+    render: function() {
+        $(this.el).empty().html(templates.home());
         _(this.options.facets).each(function(v, i) {
-              new views.Facets({
-                el: $('.facets-teaser .facet-' + i),
-                model: v
-              });
+            new views.Facets({
+              el: $('.facets-teaser .facet-' + i),
+              model: v
+            });
         });
+        return this;
     }
 });
 
@@ -249,6 +280,10 @@ views.Catalog = Backbone.View.extend({
         this.collection.bind('all', function() { view.render(); });
     },
     render: function() {
+        var items = this.collection.map(function(m) {
+            return m.renderer();
+        });
+        $(this.el).empty().html(templates.packages({packages: items}));
         return this;
     }
 });
@@ -257,6 +292,7 @@ var App = Backbone.Router.extend({
     routes: {
         '': 'home',
         'search': 'search',
+        'filter/:filter/:value': 'filter',
         'catalog/:id': 'package'
     },
     home: function() {
@@ -267,8 +303,16 @@ var App = Backbone.Router.extend({
         new views.Home({
             el: $('#main'),
             facets: facets
-        });
+        }).render();
         _(facets).each(function(m) { m.fetch(); });
+    },
+    filter: function(filter, value) {
+        var collection = new models.Packages(null, {filter: filter, value: value});
+        new views.Catalog({
+            el: $('#main'),
+            collection: collection
+        });
+        collection.fetch();
     },
     search: function() {
         var collection = new models.Packages();
