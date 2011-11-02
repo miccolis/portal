@@ -259,6 +259,9 @@ views.Facets = Backbone.View.extend({
 });
 
 views.Home = Backbone.View.extend({
+    events: {
+        'click .search input.button': 'search'
+    },
     render: function() {
         $(this.el).empty().html(templates.home());
         _(this.options.facets).each(function(v, i) {
@@ -268,6 +271,12 @@ views.Home = Backbone.View.extend({
             });
         });
         return this;
+    },
+    search: function() {
+        var keywords = $('.search input.text-input', this.el).val();
+        if (keywords.length) {
+          location.hash = '#search/' + encodeURIComponent(keywords);
+        }
     }
 });
 
@@ -301,7 +310,7 @@ views.Catalog = Backbone.View.extend({
 var App = Backbone.Router.extend({
     routes: {
         '': 'home',
-        'search': 'search',
+        'search/:keywords': 'search',
         'filter/:filter/:value': 'filter',
         'package/:id': 'package'
     },
@@ -324,7 +333,7 @@ var App = Backbone.Router.extend({
         });
         collection.fetch();
     },
-    search: function() {
+    search: function(keywords) {
         var collection = new models.Packages();
         new views.Catalog({
             el: $('#main'),
