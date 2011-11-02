@@ -57,7 +57,7 @@ var models = {};
 
 models.Package = Backbone.Model.extend({
     url: function() {
-        return rootPath + this.id;
+        return rootPath + encodeURIComponent('dataset/' + this.id);
     },
     renderer: function() {
         var model = this;
@@ -271,7 +271,17 @@ views.Home = Backbone.View.extend({
     }
 });
 
-views.Package = Backbone.View.extend();
+views.Package = Backbone.View.extend({
+    initialize: function() {
+        _.bindAll(this, 'render');
+        var view = this;
+        this.model.bind('all', function() { view.render(); });
+    },
+    render: function() {
+        $(this.el).empty().html(templates.package(this.model.renderer()));
+        return this;
+    }
+});
 
 views.Catalog = Backbone.View.extend({
     initialize: function() {
@@ -293,7 +303,7 @@ var App = Backbone.Router.extend({
         '': 'home',
         'search': 'search',
         'filter/:filter/:value': 'filter',
-        'catalog/:id': 'package'
+        'package/:id': 'package'
     },
     home: function() {
         var facets = {};

@@ -1,7 +1,9 @@
-<h2><%= title %></h2>
+<h2><%= p('title') %></h2>
+<div><%= l('name') %>: <%= p('name') %></div>
+
 <div>
-uri
-version
+  <div><%= l('url') %>: <%= p('url') %></div>
+  <div><%= l('version') %>: <%= p('version') %></div>
 </div>
 
 <div>
@@ -10,11 +12,10 @@ Groups
 Notes
 </div>
 
-
 <div>
-Author
-Maintainer
-License
+  <div><%= l('author') %>: <%= p('author') %></div>
+  <div><%= l('maintainer') %>: <%= p('maintainer') %></div>
+  <div><%= l('license') %>: <%= p('license') %></div>
 </div>
 
 <div>
