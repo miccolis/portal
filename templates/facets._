@@ -1,3 +1,3 @@
 <ul class='<%= id %>'><% _(rows).each(function(v) { %>
-  <li><a href='#filter/<%= id %>/<%= v.key %> '><%= v.key %> (<%= v.value %>)</a></li>
+  <li><a href='#<%= v.path %> '><%= v.name %> (<%= v.count %>)</a></li>
 <% }); %></ul>

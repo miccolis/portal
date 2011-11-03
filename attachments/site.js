@@ -306,12 +306,20 @@ views.Facets = Backbone.View.extend({
         this.model.bind('all', function() { view.render(); });
     },
     render: function() {
+        var path = 'filter/' + encodeURIComponent(this.model.id);
+        var rows = _(this.model.get('rows')).map(function(v) {
+            return {
+                name: v.key, // TODO escape
+                count: v.value,
+                path:  path + '/' + encodeURIComponent(v.key)
+            };
+        });
         $('div.loading', this.el)
             .removeClass('loading')
             .empty()
             .html(templates.facets({
-                id: this.model.id,
-                rows: this.model.get('rows')
+                id: this.model.escape('id'),
+                rows: rows
             }));
 
         return this;
