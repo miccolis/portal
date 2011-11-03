@@ -10,7 +10,7 @@
     "node": "~v0.4.9"
   },
   "dependencies": {
-    "couchapp": "= 0.8.1",
+    "couchapp": "https://github.com/miccolis/node.couchapp.js/tarball/attachment_operators",
     "underscore": "= 1.2.0",
     "request": "= 2.1.1"
   },
