@@ -113,4 +113,16 @@ couchapp.loadAttachments(ddoc, path.join(__dirname, 'templates'), {
   }
 });
 
+// Load search libraries
+couchapp.loadAttachments(ddoc, path.join(__dirname, 'lib'), {
+    aggregator: function(files) {
+        var code = ';var portalSearch = {}; (function() { var exports = portalSearch;';
+        files.forEach(function(f) {
+            code += f.data.toString('utf8');
+        });
+        code += ';})();';
+        return [{data: new Buffer(code), name: 'search.js', mime: 'text/javascript'}];
+    }
+});
+
 module.exports = ddoc;
