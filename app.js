@@ -37,7 +37,13 @@ ddoc.views.facet_format = {
     map: function(doc) {
         if(doc._id.match(/^dataset\//) && doc.resources) {
             doc.resources.forEach(function(v) {
-                if (v.format.length) emit(v.format, null)
+                if (v.format.length) {
+                    if (v.format.match(/^[a-zA-z]{3,4}$/)) {
+                        emit(v.format.toUpperCase(), null)
+                    } else {
+                        emit(v.format, null)
+                    }
+                }
             });
         }
     },
