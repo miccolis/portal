@@ -261,7 +261,7 @@ models.Search = Backbone.Model.extend({
         });
 
         $.ajax({
-            url: model.url() + '?reduce=false&limit=1000',
+            url: model.url() + '?reduce=false&limit=10000',
             type: "POST",
             data: JSON.stringify({keys: data}),
             processData: false,
@@ -274,7 +274,7 @@ models.Search = Backbone.Model.extend({
                     .groupBy(function(v){return v.id;})
                     .map(function(v, k){ return {id: k, count: v.length};})
                     .sortBy(function(v) { return v.count; })
-                    .first(20)
+                    .first(100)
                     .pluck('id')
                     .value();
 

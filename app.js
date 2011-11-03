@@ -18,7 +18,7 @@ ddoc.views.lib = couchapp.loadFiles('./lib');
 ddoc.views.facet_publisher = {
     map: function(doc) {
         if(doc._id.match(/^dataset\//) && doc.author) {
-            emit(doc.author, null);
+            if (doc.author.length) emit(doc.author, null);
         }
     },
     reduce: "_count"
@@ -37,7 +37,7 @@ ddoc.views.facet_format = {
     map: function(doc) {
         if(doc._id.match(/^dataset\//) && doc.resources) {
             doc.resources.forEach(function(v) {
-                emit(v.format, null)
+                if (v.format.length) emit(v.format, null)
             });
         }
     },
@@ -46,7 +46,7 @@ ddoc.views.facet_format = {
 ddoc.views.facet_license = {
     map: function(doc) {
         if(doc._id.match(/^dataset\//) && doc.license) {
-            emit(doc.license, null);
+            if (doc.license.length) emit(doc.license, null);
         }
     },
     reduce: "_count"
