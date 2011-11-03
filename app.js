@@ -53,12 +53,25 @@ ddoc.views.facet_license = {
 };
 ddoc.views.search = {
     map: function(doc) {
-        if(doc._id.match(/^dataset\//) && doc.notes) {
+        if(doc._id.match(/^dataset\//)) {
+
             var stemmer = require('views/lib/porter').stemmer,
                 stopwords = require('views/lib/stopwords').stopwords,
+                text = [],
                 stems = {};
 
-            var text = doc.notes;
+            ['notes', 'title', 'author', 'tags'].forEach(function(attr) {
+                // Bail if we've got no content.
+                if (doc[attr] == undefined || doc[attr].length == 0) return;
+
+                if (attr == 'tags') {
+                    text.concat(doc[attr]);
+                } else {
+                    text.push(doc[attr]);
+                }
+            });
+
+            text = text.join(' ');
 
             // Strip formatting out of numbers
             text = text.replace(/([0-9])(\.|\,)([0-9])/g, "$1$3");
@@ -85,7 +98,6 @@ ddoc.views.search = {
     },
     reduce: "_sum"
 };
-
 
 
 ddoc.validate_doc_update = function (newDoc, oldDoc, userCtx) {   

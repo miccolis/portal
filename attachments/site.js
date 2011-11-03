@@ -239,17 +239,10 @@ models.Facet = Backbone.Model.extend({
 
 models.Search = Backbone.Model.extend({
     url: function() {
-        return rootPath + '_design/app/_view/search?reduce=false&limit=20&include_docs=true';
+        return rootPath + '_design/app/_view/search';
     },
     sync: function(method, model, options) {
         if (method != 'read') return options.error('Unsupported method');
-
-        // TODO this should probably be a two step process, or refactored in
-        // some other way. The basic issue currently is that we give priority
-        // to documents whose keys are sorted first, not which match the best.
-        // So we could:
-        //    1) get a very large set of doc._ids and look for overlap.
-        //    2) fetch full documents which overlay the most.
 
         var text = model.get('keywords'),
             data = [];
@@ -267,14 +260,37 @@ models.Search = Backbone.Model.extend({
             }
         });
 
-        $.ajax(_.extend({
-            url: model.url(),
+        $.ajax({
+            url: model.url() + '?reduce=false&limit=1000',
             type: "POST",
             data: JSON.stringify({keys: data}),
             processData: false,
             contentType: 'application/json',
-            dataType: 'json'
-        }, options));
+            dataType: 'json',
+            error: options.error,
+            success: function(resp) {
+
+                var ids = _(resp.rows).chain()
+                    .groupBy(function(v){return v.id;})
+                    .map(function(v, k){ return {id: k, count: v.length};})
+                    .sortBy(function(v) { return v.count; })
+                    .first(20)
+                    .pluck('id')
+                    .value();
+
+                $.ajax({
+                    url: rootPath + '_all_docs?include_docs=true',
+                    type: "POST",
+                    data: JSON.stringify({keys: ids}),
+                    processData: false,
+                    contentType: 'application/json',
+                    dataType: 'json',
+                    error: options.error,
+                    success: options.success
+                });
+            }
+        });
+
     },
     parse: function(resp) {
         return {results: new models.Packages(_(resp.rows).pluck('doc'))};
