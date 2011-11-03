@@ -58,8 +58,13 @@ ddoc.views.search = {
                 stopwords = require('views/lib/stopwords').stopwords,
                 stems = {};
 
-            // Normalize the input. Currently only supports basic ASCII text.
-            text = doc.notes.replace(/\W+/g, " ").toLowerCase();
+            var text = doc.notes;
+
+            // Strip formatting out of numbers
+            text = text.replace(/([0-9])(\.|\,)([0-9])/g, "$1$3");
+
+            // Normalize text input. Currently only supports basic ASCII text.
+            text = text.replace(/\W+/g, " ").toLowerCase();
 
             // Remove stopwords and stem.
             text.split(' ').forEach(function(word) {

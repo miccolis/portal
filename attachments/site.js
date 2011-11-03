@@ -254,7 +254,10 @@ models.Search = Backbone.Model.extend({
         var text = model.get('keywords'),
             data = [];
 
-        // Normalize the input. Currently only supports basic ASCII text.
+        // Strip formatting out of numbers
+        text = text.replace(/([0-9])(\.|\,)([0-9])/g, "$1$3");
+
+        // Normalize text input. Currently only supports basic ASCII text.
         text = text.replace(/\W+/g, " ").toLowerCase();
 
         // Remove stopwords and stem.
