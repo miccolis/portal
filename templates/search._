@@ -1,0 +1,5 @@
+<div class="search">
+  <input type="text" class="text-input"/>
+  <input type="button" value="Search" class="button" />
+  <p>Search our open data directory</p>
+</div>

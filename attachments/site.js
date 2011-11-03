@@ -235,7 +235,38 @@ models.Facet = Backbone.Model.extend({
     url: function() {
         return rootPath + '_design/app/_view/facet_' + encodeURIComponent(this.id) +'?group=true';
     }
-})
+});
+
+models.Search = Backbone.Model.extend({
+    url: function() {
+        return rootPath + '_design/app/_view/search?reduce=false&limit=20&include_docs=true';
+    },
+    sync: function(method, model, options) {
+        if (method != 'read') return options.error('Unsupported method');
+
+        // TODO this should probably be a two step process, or refactored in
+        // some other way. The basic issue currently is that we give priority
+        // to documents whose keys are sorted first, not which match the best.
+        // So we could:
+        //    1) get a very large set of doc._ids and look for overlap.
+        //    2) fetch full documents which overlay the most.
+
+        // TODO stem and remove stop words...
+        var data = {keys: model.get('keywords').split(' ')};
+
+        $.ajax(_.extend({
+            url: model.url(),
+            type: "POST",
+            data: JSON.stringify(data),
+            processData: false,
+            contentType: 'application/json',
+            dataType: 'json'
+        }, options));
+    },
+    parse: function(resp) {
+        return {results: new models.Packages(_(resp.rows).pluck('doc'))};
+    }
+});
 
 var views = {};
 
@@ -307,6 +338,37 @@ views.Catalog = Backbone.View.extend({
     }
 });
 
+views.Search = Backbone.View.extend({
+    events: {
+        'click .search input.button': 'search'
+    },
+    initialize: function() {
+        _.bindAll(this, 'render');
+        var view = this;
+        this.model.bind('all', function() { view.render(); });
+    },
+    render: function() {
+        $(this.el).empty().html(templates.search());
+        $('.search input.text-input', this.el).val(this.model.escape('keywords'));
+
+        var results = this.model.get('results');
+        if (results) {
+            var items = results.map(function(m) {
+                return m.renderer();
+            });
+            $(this.el).append(templates.packages({packages: items}));
+        }
+        return this;
+    },
+    search: function() {
+        // TODO unify with other search code.
+        var keywords = $('.search input.text-input', this.el).val();
+        if (keywords.length) {
+          location.hash = '#search/' + encodeURIComponent(keywords);
+        }
+    }
+});
+
 var App = Backbone.Router.extend({
     routes: {
         '': 'home',
@@ -334,12 +396,10 @@ var App = Backbone.Router.extend({
         collection.fetch();
     },
     search: function(keywords) {
-        var collection = new models.Packages();
-        new views.Catalog({
-            el: $('#main'),
-            collection: collection 
-        });
-        collection.fetch();
+        console.log(keywords);
+        var model = new models.Search({keywords: keywords});
+        new views.Search({ el: $('#main'), model: model });
+        model.fetch();
     },
     package: function(id) {
         var model = new models.Package({id:id});

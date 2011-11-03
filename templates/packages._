@@ -1,0 +1,10 @@
+<div class="packages">
+  <% _(packages).each(function(item) { %>
+    <div class="package">
+      <h3><a href="#package/<%= item.p('name') %>"><%= item.p('title') %></a></h3>
+      <div><%= item.l('name') %>: <%= item.p('name') %></div>
+      <div><%= item.l('url') %>: <%= item.p('url') %></div>
+      <div><%= item.l('author') %>: <%= item.p('author') %></div>
+    </div>
+  <% }); %>
+</div>
