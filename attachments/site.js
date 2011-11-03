@@ -251,13 +251,23 @@ models.Search = Backbone.Model.extend({
         //    1) get a very large set of doc._ids and look for overlap.
         //    2) fetch full documents which overlay the most.
 
-        // TODO stem and remove stop words...
-        var data = {keys: model.get('keywords').split(' ')};
+        var text = model.get('keywords'),
+            data = [];
+
+        // Normalize the input. Currently only supports basic ASCII text.
+        text = text.replace(/\W+/g, " ").toLowerCase();
+
+        // Remove stopwords and stem.
+        text.split(' ').forEach(function(word) {
+            if (word.length && portalSearch.stopwords[word] == undefined){
+                data.push(portalSearch.stemmer(word));
+            }
+        });
 
         $.ajax(_.extend({
             url: model.url(),
             type: "POST",
-            data: JSON.stringify(data),
+            data: JSON.stringify({keys: data}),
             processData: false,
             contentType: 'application/json',
             dataType: 'json'
@@ -396,7 +406,6 @@ var App = Backbone.Router.extend({
         collection.fetch();
     },
     search: function(keywords) {
-        console.log(keywords);
         var model = new models.Search({keywords: keywords});
         new views.Search({ el: $('#main'), model: model });
         model.fetch();

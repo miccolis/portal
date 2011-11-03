@@ -61,6 +61,7 @@ ddoc.views.search = {
             // Normalize the input. Currently only supports basic ASCII text.
             text = doc.notes.replace(/\W+/g, " ").toLowerCase();
 
+            // Remove stopwords and stem.
             text.split(' ').forEach(function(word) {
                 if (word.length && stopwords[word] == undefined){
                     word = stemmer(word);
