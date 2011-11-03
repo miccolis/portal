@@ -14,7 +14,7 @@ ddoc =
   ;
 
 ddoc.views = {};
-
+ddoc.views.lib = couchapp.loadFiles('./lib');
 ddoc.views.facet_publisher = {
     map: function(doc) {
         if(doc._id.match(/^dataset\//) && doc.author) {
@@ -50,6 +50,34 @@ ddoc.views.facet_license = {
         }
     },
     reduce: "_count"
+};
+ddoc.views.search = {
+    map: function(doc) {
+        if(doc._id.match(/^dataset\//) && doc.notes) {
+            var stemmer = require('views/lib/porter').stemmer,
+                stopwords = require('views/lib/stopwords').stopwords,
+                stems = {};
+
+            // Normalize the input. Currently only supports basic ASCII text.
+            text = doc.notes.replace(/\W+/g, " ").toLowerCase();
+
+            text.split(' ').forEach(function(word) {
+                if (word.length && stopwords[word] == undefined){
+                    word = stemmer(word);
+                    if (stems[word] == undefined) {
+                        stems[word] = 1;
+                    } else {
+                        stems[word]++;
+                    }
+                }
+            });
+
+            for (var word in stems) {
+                emit(word, stems[word]);
+            }
+        }
+    },
+    reduce: "_sum"
 };
 
 
