@@ -323,7 +323,7 @@ views.Home = Backbone.View.extend({
         'click .search input.button': 'search'
     },
     render: function() {
-        $(this.el).empty().html(templates.home());
+        $(this.el).empty().html(templates.search() + templates.home());
         _(this.options.facets).each(function(v, i) {
             new views.Facets({
               el: $('.facets-teaser .facet-' + i),

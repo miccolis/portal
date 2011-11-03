@@ -1,8 +1,3 @@
-<div class="search">
-  <input type="text" class="text-input"/>
-  <input type="button" value="Search" class="button" />
-  <p>Search our open data directory</p>
-</div>
 <div class="facets-teaser">
   <div class="facet facet-publisher">
     <h3>Browse by publisher</h3>
