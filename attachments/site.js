@@ -55,10 +55,10 @@ rootPath = rootPath[1];
 // Begin Backbone setup.
 var models = {};
 
-models.Package = Backbone.Model.extend({
-    url: function() {
-        return rootPath + encodeURIComponent('dataset/' + this.id);
-    },
+// This Object should not be used directly. It is meant to be extended by
+// those looking for a model that knows something about schemas.
+models.Schema = Backbone.Model.extend({
+    schema: { properties: {}},
     renderer: function() {
         var model = this;
         return {
@@ -71,6 +71,18 @@ models.Package = Backbone.Model.extend({
           // Description
           d: function(attr) { return model.schema.properties[attr].description; }
         };
+    }
+});
+
+models.Package = models.Schema.extend({
+    url: function() {
+        return rootPath + encodeURIComponent('dataset/' + this.id);
+    },
+    parse: function(resp) {
+        if (resp.resources.length) {
+            resp.resources = new models.Resources(resp.resources);
+        }
+        return resp;
     },
     schema: {
         name: 'package',
@@ -178,11 +190,15 @@ models.Packages = Backbone.Collection.extend({
                 'key="'+ encodeURIComponent(options.value)+'"'
             ].join('&');
             this.url = url;
+            this.options = options;
         }
     }
 });
 
-models.Resource = Backbone.Model.extend({
+models.Resource = models.Schema.extend({
+    initialize: function() {
+      _.bindAll(this, 'renderer');
+    },
     url: function() {
         return rootPath + this.id;
     },
@@ -230,6 +246,8 @@ models.Resource = Backbone.Model.extend({
         }
     }
 });
+
+models.Resources = Backbone.Collection.extend({model: models.Resource});
 
 models.Facet = Backbone.Model.extend({
     url: function() {
@@ -352,25 +370,37 @@ views.Package = Backbone.View.extend({
     initialize: function() {
         _.bindAll(this, 'render');
         var view = this;
-        this.model.bind('all', function() { view.render(); });
+        this.model.bind('change', function() { view.render(); });
     },
     render: function() {
-        $(this.el).empty().html(templates.package(this.model.renderer()));
+        var context = this.model.renderer();
+        context.resources = [];
+        var resources = this.model.get('resources');
+        if (resources) {
+            resources.each(function(v) {
+                context.resources.push(v.renderer());
+            });
+        }
+        $(this.el).empty().html(templates.package(context));
         return this;
     }
 });
 
-views.Catalog = Backbone.View.extend({
+views.Filter = Backbone.View.extend({
     initialize: function() {
-        _.bindAll(this, 'render');
+        _.bindAll(this, 'render', 'renderCollection');
         var view = this;
-        this.collection.bind('all', function() { view.render(); });
+        this.collection.bind('all', function() { view.renderCollection(); });
     },
     render: function() {
+        var o = this.options;
+        $(this.el).empty().html(templates.filterPage({title: o.filter +': '+ o.value}));
+    },
+    renderCollection: function() {
         var items = this.collection.map(function(m) {
             return m.renderer();
         });
-        $(this.el).empty().html(templates.packages({packages: items}));
+        $('.packages', this.el).empty().html(templates.packages({packages: items}));
         return this;
     }
 });
@@ -426,10 +456,12 @@ var App = Backbone.Router.extend({
     },
     filter: function(filter, value) {
         var collection = new models.Packages(null, {filter: filter, value: value});
-        new views.Catalog({
+        new views.Filter({
             el: $('#main'),
-            collection: collection
-        });
+            collection: collection,
+            filter: filter,
+            value: value
+        }).render();
         collection.fetch();
     },
     search: function(keywords) {

@@ -8,8 +8,10 @@ h2 {
 
 .loading {
   background: url('ajax-loader.gif') 50% 50% no-repeat;
+  height: 200px;
   }
 
+/* Layout */
 #banner {
   height: 60px;
   background-color: #2d2d2d;
@@ -34,6 +36,16 @@ h2 {
     width: 220px;
     }
 
+#main-content {
+  width: 640px;
+  float: left;
+  }
+#supporting-content {
+  width: 320px;
+  float: left;
+  }
+
+/* Search */
 .search {
   float: left;
   width: 958px; 
@@ -51,6 +63,7 @@ h2 {
       width: 280px;
       }
 
+/* Facets */
 .facets-teaser .facet {
   width: 200px;
   padding: 20px;
@@ -59,6 +72,17 @@ h2 {
   .facets-teaser .facet h3 {
     border-bottom: 1px solid #4d4d4d;
     }
-  .facets-teaser .facet > div {
-    height: 200px;
+
+.package-meta span.label {
+  color: #4d4d4d;
+  text-transform: uppercase;
+  }
+
+/* Resources */
+.resources ul {
+  padding: 10px;
+  }
+  .resources ul li {
+    padding: 5px 0px;
+    border-top: 1px solid #2d2d2d;
     }
