@@ -92,11 +92,11 @@ models.Package = models.Schema.extend({
         if (resp.resources.length) {
             resp.resources = new models.Resources(resp.resources);
         }
-        if (resp.tags.length) {
-            resp.tags = new models.Resources(_(resp.tags).map(function(v) {
+        _(['tags', 'groups']).each(function(i) {
+            resp[i] = new models.Tags(_(resp[i]).map(function(v) {
                 return {name: v};
             }));
-        }
+        });
         return resp;
     },
     schema: {
@@ -395,7 +395,7 @@ views.Package = Backbone.View.extend({
         var model = this.model,
             context = this.model.renderer();
 
-        _(['resources', 'tags']).each(function(i) {
+        _(['resources', 'tags', 'groups']).each(function(i) {
             context[i] = [];
             var attr = model.get(i);
             if (attr) {

@@ -25,11 +25,13 @@
   <h3>Tags</h3>
   <ul class="package-tags">
     <% _(tags).each(function(tag) { %>
-      <li><%= tag %></li>
+      <li><a href="#filter/tag/<%= tag %>"><%= tag %></a></li>
     <% }); %>
   </ul>
   <h3>Groups</h3>
   <ul class="package-groups">
-    <li>Baz</li>
+    <% _(groups).each(function(tag) { %>
+      <li><%= tag %></li>
+    <% }); %>
   </ul>
 <div>
