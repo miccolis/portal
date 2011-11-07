@@ -16,14 +16,15 @@
 
 <div id="supporting-content">
   <ul class="package-meta">
-    <% _(['author', 'maintainer', 'license']).each(function(i) {%>
+    <% _(['author', 'author_email', 'maintainer', 'maintainer_email', 'license']).each(function(i) {%>
     <li><span class='label'><%= l(i) %>:</span> <%= p(i) %></li>
     <% }); %>
   </ul>
   <h3>Tags</h3>
   <ul class="package-tags">
-    <li>Foo</li>
-    <li>Bar</li>
+    <% _(tags).each(function(tag) { %>
+      <li><%= tag %></li>
+    <% }); %>
   </ul>
   <h3>Groups</h3>
   <ul class="package-groups">

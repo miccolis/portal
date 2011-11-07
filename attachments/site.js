@@ -92,6 +92,11 @@ models.Package = models.Schema.extend({
         if (resp.resources.length) {
             resp.resources = new models.Resources(resp.resources);
         }
+        if (resp.tags.length) {
+            resp.tags = new models.Resources(_(resp.tags).map(function(v) {
+                return {name: v};
+            }));
+        }
         return resp;
     },
     schema: {
@@ -162,9 +167,8 @@ models.Package = models.Schema.extend({
                 format: 'text'
             },
             'tags': { 
-                type: 'string',
+                type: 'array',
                 description: 'arbitrary textual tags for the dataset',
-                required: 'true'
             },
             'resources': {
                 type: 'string',
@@ -172,9 +176,11 @@ models.Package = models.Schema.extend({
                 required: 'true'
             },
             'groups': {
-                type: 'string',
+                type: 'array',
                 description: 'list of Groups this dataset is a member of',
-                required: 'true'
+            },
+            'extras': {
+                type: 'object',
             }
         }
     }
@@ -204,6 +210,8 @@ models.Packages = Backbone.Collection.extend({
         }
     }
 });
+
+models.Tags = Backbone.Collection.extend({model: Backbone.Model});
 
 models.Resource = models.Schema.extend({
     initialize: function() {
@@ -384,14 +392,24 @@ views.Package = Backbone.View.extend({
         this.model.bind('change', function() { view.render(); });
     },
     render: function() {
-        var context = this.model.renderer();
-        context.resources = [];
-        var resources = this.model.get('resources');
-        if (resources) {
-            resources.each(function(v) {
-                context.resources.push(v.renderer());
-            });
-        }
+        var model = this.model,
+            context = this.model.renderer();
+
+        _(['resources', 'tags']).each(function(i) {
+            context[i] = [];
+            var attr = model.get(i);
+            if (attr) {
+                attr.each(function(v) {
+                    if (i == 'resources') {
+                        context[i].push(v.renderer());
+                    }
+                    else {
+                        context[i].push(v.escape('name'));
+                    }
+                });
+            }
+        });
+
         $(this.el).empty().html(templates.package(context));
         return this;
     }
