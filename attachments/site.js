@@ -60,10 +60,20 @@ var models = {};
 models.Schema = Backbone.Model.extend({
     schema: { properties: {}},
     renderer: function() {
-        var model = this;
+        var model = this,
+            props = this.schema.properties;
+
         return {
           // Print
-          p: function(attr) { return model.escape(attr); },
+          p: function(attr) {
+              if (props[attr] != undefined) {
+                  var e = model.escape(attr);
+                  if (props[attr].format == 'uri') {
+                      return '<a href="'+ e +'">'+ e +'</a>';
+                  }
+                  return e;
+              }
+          },
           // Raw
           r: function(attr) { return model.get(attr); },
           // Label
@@ -207,6 +217,7 @@ models.Resource = models.Schema.extend({
         properties: {
             url: {
                 type: 'string',
+                format: 'uri',
                 description: 'The url points to the location online where the content of that resource can be found. For a file this would be the location online of that file (or more generally a url which yields the bitstream representing the contents of that file. For an API this would be the endpoint for the api.',
                 required: 'true'
             },
