@@ -1,10 +1,12 @@
 <h2><%= p('title') %></h2>
 <div id="main-content">
   <ul class="package-meta">
-    <% _(['url', 'version', 'notes']).each(function(i) {%>
+    <% _(['url', 'download_url', 'version', 'notes']).each(function(i) {%>
     <li><span class='label'><%= l(i) %>:</span> <%= p(i) %></li>
     <% }); %>
   </ul>
+
+  <div>Extras</div>
 
   <div class='resources'>
     <h3>Resources</h3>
