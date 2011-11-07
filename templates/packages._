@@ -5,7 +5,7 @@
       <ul class="package-meta">
         <li><span class='label'><%= item.l('url') %>:</span> <%= item.p('url') %></li>
         <li><span class='label'><%= item.l('author') %>:</span> <%= item.p('author') %></li>
-        <li><span class='label'>Resources:</span> <%= 'X' %></li>
+        <li><span class='label'>Resources:</span> <%= item.resourceCount %></li>
       </ul>
     </div>
   <% }); %>

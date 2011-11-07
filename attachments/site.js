@@ -450,7 +450,9 @@ views.Search = Backbone.View.extend({
         var results = this.model.get('results');
         if (results) {
             var items = results.map(function(m) {
-                return m.renderer();
+                var context = m.renderer();
+                context.resourceCount = m.get('resources').length;
+                return context;
             });
             $(this.el).append(templates.packages({packages: items}));
         }
