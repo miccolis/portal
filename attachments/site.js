@@ -45,12 +45,7 @@ var param = function( a ) {
 	}
 }
 
-// Determine the name of the CouchDB we're working with.
-var rootPath = /(.+)_design/.exec(location.pathname);
-if (rootPath.length < 2) {
-    console.error("Couldn't determine database name");
-}
-rootPath = rootPath[1];
+var rootPath = location.pathname;
 
 // Begin Backbone setup.
 var models = {};
@@ -86,7 +81,7 @@ models.Schema = Backbone.Model.extend({
 
 models.Package = models.Schema.extend({
     url: function() {
-        return rootPath + encodeURIComponent('dataset/' + this.id);
+        return rootPath + '/api/' + encodeURIComponent('dataset/' + this.id);
     },
     parse: function(resp) {
         if (resp.resources.length) {
@@ -188,24 +183,19 @@ models.Package = models.Schema.extend({
 
 models.Packages = Backbone.Collection.extend({
     model: models.Package,
-    url: rootPath + '_all_docs?include_docs=true',
+    url: rootPath + '/api/packages',
     parse: function(resp) {
         return _(resp.rows).pluck('doc');
     },
     initialize: function(models, options) {
         var options = options || {};
         if (options.filter && options.value) {
-            var filters = ['tag', 'author', 'format', 'license'];
+            var filters = ['tags', 'authors', 'formats', 'licenses'];
             var pos = filters.indexOf(options.filter);
             if (pos === -1) return; // TODO Fail harder.
 
-            var url = rootPath +'_design/app/_view/facet_' + filters[pos] +'?';
-            url += [
-                'reduce=false',
-                'include_docs=true',
-                'key="'+ encodeURIComponent(options.value)+'"'
-            ].join('&');
-            this.url = url;
+            this.url = rootPath +'/api/filter/' + filters[pos] +'/';
+            this.url += encodeURIComponent(options.value);
             this.options = options;
         }
     }
@@ -270,13 +260,13 @@ models.Resources = Backbone.Collection.extend({model: models.Resource});
 
 models.Facet = Backbone.Model.extend({
     url: function() {
-        return rootPath + '_design/app/_view/facet_' + encodeURIComponent(this.id) +'?group=true';
+        return rootPath + '/api/facet/' + encodeURIComponent(this.id) +'?group=true';
     }
 });
 
 models.Search = Backbone.Model.extend({
     url: function() {
-        return rootPath + '_design/app/_view/search';
+        return rootPath + '/api/search';
     },
     sync: function(method, model, options) {
         if (method != 'read') return options.error('Unsupported method');
@@ -298,7 +288,7 @@ models.Search = Backbone.Model.extend({
         });
 
         $.ajax({
-            url: model.url() + '?reduce=false&limit=10000',
+            url: model.url(),
             type: "POST",
             data: JSON.stringify({keys: data}),
             processData: false,
@@ -316,7 +306,7 @@ models.Search = Backbone.Model.extend({
                     .value();
 
                 $.ajax({
-                    url: rootPath + '_all_docs?include_docs=true',
+                    url: rootPath + '/api/packages',
                     type: "POST",
                     data: JSON.stringify({keys: ids}),
                     processData: false,
@@ -476,7 +466,7 @@ var App = Backbone.Router.extend({
     },
     home: function() {
         var facets = {};
-        ['publisher', 'tag', 'format', 'license'].forEach(function(att) {
+        ['authors', 'tags', 'formats', 'licenses'].forEach(function(att) {
             facets[att] = new models.Facet({id: att});
         });
         new views.Home({

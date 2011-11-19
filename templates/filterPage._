@@ -1,4 +1,7 @@
 <h2><%= title %></h2>
-<div class="packages">
+<div id="main-content" class="packages">
   <div class="loading"></div>
+</div>
+<div id="supporting-content">
+  Summary goes here
 </div>

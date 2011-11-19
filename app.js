@@ -2,20 +2,39 @@ var path = require('path'),
     couchapp = require('couchapp'),
     _ = require('underscore');
 
-ddoc = 
-  { _id:'_design/app'
-  , rewrites : 
-    [ {from:"/", to:'index.html'}
-    , {from:"/api", to:'../../'}
-    , {from:"/api/*", to:'../../*'}
-    , {from:"/*", to:'*'}
+ddoc = {
+    _id:'_design/app',
+    rewrites : [
+        {from:"/", to:'index.html'},
+        {from:"/api", to:'../../'},
+        {
+          from:"/api/packages",
+          to:'../../_all_docs',
+          query: {include_docs: 'true'}
+        },
+        {
+          from:"/api/search/",
+          to:'../../_design/app/_view/search',
+          query: {reduce: 'false', limit: '10000'}
+        },
+        {
+          from:"/api/facet/:facet",
+          to:'../../_design/app/_view/:facet',
+          query: {group: 'true'}
+        },
+        {
+          from:"/api/filter/:facet/:key",
+          to:'../../_design/app/_view/:facet',
+          query: {reduce: 'false', include_docs: 'true'}
+        },
+        {from:"/api/*", to:'../../*'},
+        {from:"/*", to:'*'},
     ]
-  }
-  ;
+};
 
 ddoc.views = {};
 ddoc.views.lib = couchapp.loadFiles('./lib');
-ddoc.views.facet_publisher = {
+ddoc.views.authors = {
     map: function(doc) {
         if(doc._id.match(/^dataset\//) && doc.author) {
             if (doc.author.length) emit(doc.author, null);
@@ -23,7 +42,7 @@ ddoc.views.facet_publisher = {
     },
     reduce: "_count"
 };
-ddoc.views.facet_tag = {
+ddoc.views.tags = {
     map: function(doc) {
         if(doc._id.match(/^dataset\//) && doc.tags) {
             doc.tags.forEach(function(d){
@@ -33,7 +52,7 @@ ddoc.views.facet_tag = {
     },
     reduce: "_count"
 };
-ddoc.views.facet_format = {
+ddoc.views.formats = {
     map: function(doc) {
         if(doc._id.match(/^dataset\//) && doc.resources) {
             doc.resources.forEach(function(v) {
@@ -49,7 +68,7 @@ ddoc.views.facet_format = {
     },
     reduce: "_count"
 };
-ddoc.views.facet_license = {
+ddoc.views.licenses = {
     map: function(doc) {
         if(doc._id.match(/^dataset\//) && doc.license) {
             if (doc.license.length) emit(doc.license, null);
