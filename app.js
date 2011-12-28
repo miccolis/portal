@@ -136,24 +136,30 @@ couchapp.loadAttachments(ddoc, path.join(__dirname, 'attachments'));
 
 // Load templates as a single attachment.
 couchapp.loadAttachments(ddoc, path.join(__dirname, 'templates'), {
-  operators: [function(f, data) {
-      if (path.extname(f) === '._') {
-          var t= ';;'
-          t+= 'templates.'+ path.basename(f, '._') + '=';
-          t+= _.template(data.toString('utf8'));
-          return new Buffer(t); 
-      }
-      return data; 
-  }],
-  aggregator: function(files) {
-      var templates = 'var templates = templates || {};\n',
-          aggregated = [];
-      files.forEach(function(f) {
-          templates += f.data.toString('utf8');
-      });
-      aggregated.push({data: new Buffer(templates), name: 'templates.js', mime: 'text/javascript'});
-      return aggregated;
-  }
+    operators: [function(f, data) {
+        if (path.extname(f) === '._') {
+            try {
+                var t= ';;'
+                t+= 'templates.'+ path.basename(f, '._') + '=';
+                t+= _.template(data.toString('utf8'));
+                return new Buffer(t);
+            }
+            catch(e) {
+                console.log(e);
+                console.log("ERROR: failed to transform template: "+f);
+            }
+        }
+        return data;
+    }],
+    aggregator: function(files) {
+        var templates = 'var templates = templates || {};\n',
+            aggregated = [];
+        files.forEach(function(f) {
+            templates += f.data.toString('utf8');
+        });
+        aggregated.push({data: new Buffer(templates), name: 'templates.js', mime: 'text/javascript'});
+        return aggregated;
+    }
 });
 
 // Load search libraries
