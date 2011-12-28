@@ -576,13 +576,17 @@ var App = Backbone.Router.extend({
         model.fetch();
     },
     newPackage: function() {
-        var model = new models.Package({id: 'new'});
-        this.update(new views.EditPackage({el: $('#main'), model: model}));
+        if (this.auth) {
+            var model = new models.Package({id: 'new'});
+            this.update(new views.EditPackage({el: $('#main'), model: model}));
+        }
     },
     editPackage: function(id) {
-        var model = new models.Package({id:id});
-        this.update(new views.EditPackage({el: $('#main'), model: model}));
-        model.fetch();
+        if (this.auth) {
+            var model = new models.Package({id:id});
+            this.update(new views.EditPackage({el: $('#main'), model: model}));
+            model.fetch();
+        }
     }
 });
 
