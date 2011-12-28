@@ -54,9 +54,36 @@ h2 {
 }
 
 /* Forms */
-input {
+.form-elems { float: left; }
+
+.form-elems input {
+  float: left;
   border: 1px solid #2d2d2d;
-  padding: 2px;
+  font-size: 14px;
+  line-height: 20px;
+  padding: 0px 2px;
+  }
+
+.form-elems label {
+  float: left;
+  font-size: 14px;
+  line-height: 20px;
+  }
+
+#main-content .form-elems { padding-bottom: 10px; }
+#main-content .form-elems input { width: 500px; }
+#main-content .form-elems label {
+  width: 120px;
+  text-align: right;
+  padding-right: 5px;
+  }
+
+#supporting-content .form-elems { padding-bottom: 10px; }
+#supporting-content .form-elems input { width: 200px; }
+#supporting-content .form-elems label {
+  width: 100px;
+  text-align: right;
+  padding-right: 5px;
   }
 
 /* Search */

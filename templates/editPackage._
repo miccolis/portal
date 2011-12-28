@@ -1,14 +1,14 @@
 <h2>Edit / Create package</h2>
 
 <div id="main-content">
-  <div>
+  <div class='form-elems'>
     <label for='title'>Title</label>
     <input name='title' type='textfield' value='<%= p('title') %>'></input>
   </div>
 
   <ul class="package-meta">
     <% _(['url', 'download_url', 'version', 'notes']).each(function(i) {%>
-    <div>
+    <div class='form-elems'>
       <label for='<%= i %>'><%= i %></label>
       <input name='<%= i %>' type='textfield' value='<%= p(i) %>'></input>
     </div>
@@ -28,7 +28,7 @@
 <div id="supporting-content">
   <ul class="package-meta">
     <% _(['author', 'author_email', 'maintainer', 'maintainer_email', 'license']).each(function(i) {%>
-    <div>
+    <div class='form-elems'>
       <label for='<%= i %>'><%= i %></label>
       <input name='<%= i %>' type='textfield' value='<%= p(i) %>'></input>
     </div>
