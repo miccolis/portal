@@ -53,7 +53,11 @@ var models = {};
 models.Session = Backbone.Model.extend({
     url: '/api/session',
     fetch: function(options) {
-        options.headers = {Authorization: 'Basic <base64-encoded-username:password>'};
+        // Write the password into the header, and discard it.
+        // NOTE this is not working...
+        options.headers = {Authorization: 'Basic '+ btoa(this.id +':'+options.password)};
+        delete options.password;
+
         Backbone.Model.prototype.fetch.call(this, options);
     }
 });
@@ -337,6 +341,7 @@ var views = {};
 views.Controls = Backbone.View.extend({
     events: {
         'click a.login': 'toggleLoginForm',
+        'click input.login': 'sessionCreate',
         'click a.logout': 'sessionDestroy'
     },
     initialize: function(options) {
@@ -368,13 +373,23 @@ views.Controls = Backbone.View.extend({
         ev.preventDefault();
     },
     sessionCreate: function() {
-        // create and sync session model.
-        this.render();
+        var err = false;
+        var username = $('input[name=username]', this.el).val()
+        var password= $('input[name=password]', this.el).val()
+        if (username && password ) {
+            var session = new models.Session({id: username})
+            session.fetch({password: password});
+        }
+        else {
+            err = 'Please enter both a username and password';
+            // TODO better error presentation.
+            alert(err);
+        }
     },
     sessionDestroy: function() {
         // Delete the session...
         // remove the cookie...
-        this.render();
+        // this.render();
     }
 });
 
