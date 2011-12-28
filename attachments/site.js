@@ -355,7 +355,8 @@ views.Facets = Backbone.View.extend({
 
 views.Home = Backbone.View.extend({
     events: {
-        'click .search input.button': 'search'
+        'click .search input.button': 'search',
+        'keydown .search input.text-input': 'searchKeypress'
     },
     render: function() {
         $(this.el).empty().html(templates.search() + templates.home());
@@ -371,6 +372,11 @@ views.Home = Backbone.View.extend({
         var keywords = $('.search input.text-input', this.el).val();
         if (keywords.length) {
           location.hash = '#search/' + encodeURIComponent(keywords);
+        }
+    },
+    searchKeypress: function(ev) {
+        if (ev.keyCode == 13) {
+            this.search();
         }
     }
 });
@@ -425,8 +431,10 @@ views.Filter = Backbone.View.extend({
 });
 
 views.Search = Backbone.View.extend({
+    // TODO unify with other search code.
     events: {
-        'click .search input.button': 'search'
+        'click .search input.button': 'search',
+        'keydown .search input.text-input': 'searchKeypress'
     },
     initialize: function() {
         _.bindAll(this, 'render');
@@ -449,10 +457,14 @@ views.Search = Backbone.View.extend({
         return this;
     },
     search: function() {
-        // TODO unify with other search code.
         var keywords = $('.search input.text-input', this.el).val();
         if (keywords.length) {
           location.hash = '#search/' + encodeURIComponent(keywords);
+        }
+    },
+    searchKeypress: function(ev) {
+        if (ev.keyCode == 13) {
+            this.search();
         }
     }
 });
