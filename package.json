@@ -7,7 +7,7 @@
     "url": ""
   },
   "engines": {
-    "node": "~v0.4.9"
+    "node": "~v0.6.6"
   },
   "dependencies": {
     "couchapp": "https://github.com/miccolis/node.couchapp.js/tarball/attachment_operators",
