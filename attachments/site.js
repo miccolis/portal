@@ -122,43 +122,43 @@ models.Package = models.Schema.extend({
             'author': {
                 type: 'string',
                 description: 'original creator of the dataset',
-                required: 'true',
+                required: 'false',
                 format: 'text'
             },
             'author_email': {
                 type: 'string',
                 description: 'email for original creator of the dataset',
-                required: 'true',
+                required: 'false',
                 format: 'email'
             },
             'maintainer': {
                 type: 'string',
                 description: 'current maintainer or publisher of the dataset',
-                required: 'true',
+                required: 'false',
                 format: 'text'
             },
             'maintainer_email': {
                 type: 'string',
                 description: 'email for current maintainer or publisher of the dataset',
-                required: 'true',
+                required: 'false',
                 format: 'email'
             },
             'license': {
                 type: 'string',
                 description: 'license under which the dataset is made available',
-                required: 'true',
+                required: 'false',
                 format: 'text'
             },
             'version': {
                 type: 'string',
                 description: 'dataset version',
-                required: 'true',
+                required: 'false',
                 format: 'text'
             },
             'notes': {
                 type: 'string',
                 description: 'description and other information about the dataset',
-                required: 'true',
+                required: 'false',
                 format: 'text'
             },
             'tags': { 
@@ -168,7 +168,7 @@ models.Package = models.Schema.extend({
             'resources': {
                 type: 'string',
                 description: 'list of Resources',
-                required: 'true'
+                required: 'false'
             },
             'groups': {
                 type: 'array',
