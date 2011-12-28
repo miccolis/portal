@@ -50,6 +50,14 @@ var rootPath = location.pathname;
 // Begin Backbone setup.
 var models = {};
 
+models.Session = Backbone.Model.extend({
+    url: '/api/session',
+    fetch: function(options) {
+        options.headers = {Authorization: 'Basic <base64-encoded-username:password>'};
+        Backbone.Model.prototype.fetch.call(this, options);
+    }
+});
+
 // This Object should not be used directly. It is meant to be extended by
 // those looking for a model that knows something about schemas.
 models.Schema = Backbone.Model.extend({
@@ -327,29 +335,46 @@ models.Search = Backbone.Model.extend({
 var views = {};
 
 views.Controls = Backbone.View.extend({
+    events: {
+        'click a.login': 'toggleLoginForm',
+        'click a.logout': 'sessionDestroy'
+    },
     initialize: function(options) {
         this.app = options.app;
     },
     controls: function() {
         var links = [];
         if (this.app.auth) {
-            links.push({name: 'Logout', link: 'logout'});
+            links.push({name: 'Logout', link: 'logout', klass: 'logout'});
         }
         else {
-            links.push({name: 'Login', link: 'login'});
+            links.push({name: 'Login', link: 'login', klass: 'login'});
         }
         return {links: links};
     },
     render: function(view) {
-        var context = {};
+        var context = this.controls();
+
+        // Allow views to add thier own business.
         if (view && view.controls !== undefined) {
-            context = view.controls();
+            context = _(context).extend(view.controls());
         }
-        else {
-            context = this.controls();
-        }
+
         $(this.el).empty().append(templates.controls(context));
         return this;
+    },
+    toggleLoginForm: function(ev) {
+        $(this.el).addClass('overlaid').append(templates.loginForm());
+        ev.preventDefault();
+    },
+    sessionCreate: function() {
+        // create and sync session model.
+        this.render();
+    },
+    sessionDestroy: function() {
+        // Delete the session...
+        // remove the cookie...
+        this.render();
     }
 });
 

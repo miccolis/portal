@@ -1,0 +1,10 @@
+<div>
+  <div class='form-elems'>
+    <label for='username'>Username</label>
+    <input name='username' type='textfield'></input>
+  </div>
+  <div class='form-elems'>
+    <label for='username'>Password</label>
+    <input name='password' type='password'></input>
+  </div>
+</div>

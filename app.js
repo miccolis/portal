@@ -27,7 +27,8 @@ ddoc = {
           to:'../../_design/app/_view/:facet',
           query: {reduce: 'false', include_docs: 'true'}
         },
-        {from:"/api/*", to:'../../*'},
+        {from:"/api/session", to:'../../_session'},
+        //{from:"/api/*", to:'../../*'},
         {from:"/*", to:'*'},
     ]
 };

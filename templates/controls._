@@ -1,5 +1,5 @@
 <ul>
   <% _(links).each(function(l) { %>
-  <li><a href='<%= l.link %>'><%= l.name %></a></li>
+  <li><a href='<%= l.link %>' class='<%= (l.klass ? l.klass : '') %>'><%= l.name %></a></li>
   <% }); %>
 </ul>
