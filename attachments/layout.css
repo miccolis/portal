@@ -45,6 +45,14 @@ h2 {
   float: left;
   }
 
+#controls {
+  position: absolute;
+  padding: 5px;
+  top: 15px;
+  right: 0px;
+  background: #aaa;
+}
+
 /* Forms */
 input {
   border: 1px solid #2d2d2d;

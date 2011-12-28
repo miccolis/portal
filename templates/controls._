@@ -1,0 +1,5 @@
+<ul>
+  <% _(links).each(function(l) { %>
+  <li><a href='<%= l.link %>'><%= l.name %></a></li>
+  <% }); %>
+</ul>

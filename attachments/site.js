@@ -326,6 +326,33 @@ models.Search = Backbone.Model.extend({
 
 var views = {};
 
+views.Controls = Backbone.View.extend({
+    initialize: function(options) {
+        this.app = options.app;
+    },
+    controls: function() {
+        var links = [];
+        if (this.app.auth) {
+            links.push({name: 'Logout', link: 'logout'});
+        }
+        else {
+            links.push({name: 'Login', link: 'login'});
+        }
+        return {links: links};
+    },
+    render: function(view) {
+        var context = {};
+        if (view && view.controls !== undefined) {
+            context = view.controls();
+        }
+        else {
+            context = this.controls();
+        }
+        $(this.el).empty().append(templates.controls(context));
+        return this;
+    }
+});
+
 views.Facets = Backbone.View.extend({
     initialize: function() {
         _.bindAll(this, 'render');
@@ -495,7 +522,16 @@ views.Search = Backbone.View.extend({
 });
 
 var App = Backbone.Router.extend({
-    auth: true, // TODO use this flag for authentication status.
+    auth: false, // TODO use this flag for authentication status.
+    initialize: function() {
+        this.controls = new views.Controls({
+            el: $('#controls'),
+            app: this
+        });
+    },
+    update: function(view) {
+        this.controls.render(view);
+    },
     routes: {
         '': 'home',
         'search/:keywords': 'search',
@@ -509,35 +545,45 @@ var App = Backbone.Router.extend({
         ['authors', 'tags', 'formats', 'licenses'].forEach(function(att) {
             facets[att] = new models.Facet({id: att});
         });
-        new views.Home({
+
+        this.update(new views.Home({
             el: $('#main'),
             facets: facets
-        }).render();
+        }).render());
+
         _(facets).each(function(m) { m.fetch(); });
     },
     filter: function(filter, value) {
         var collection = new models.Packages(null, {filter: filter, value: value});
-        new views.Filter({
+
+        this.update(new views.Filter({
             el: $('#main'),
             collection: collection,
             filter: filter,
             value: value
-        }).render();
+        }).render());
+
         collection.fetch();
     },
     search: function(keywords) {
         var model = new models.Search({keywords: keywords});
-        new views.Search({ el: $('#main'), model: model });
+        this.update(new views.Search({ el: $('#main'), model: model }));
         model.fetch();
     },
     package: function(id) {
         var model = new models.Package({id:id});
-        new views.Package({
-            el: $('#main'),
-            model: model
-        });
+        this.update(new views.Package({el: $('#main'), model: model}));
         model.fetch();
     },
+    newPackage: function() {
+        var model = new models.Package({id: 'new'});
+        this.update(new views.EditPackage({el: $('#main'), model: model}));
+    },
+    editPackage: function(id) {
+        var model = new models.Package({id:id});
+        this.update(new views.EditPackage({el: $('#main'), model: model}));
+        model.fetch();
+    }
 });
 
 $(function () { 
