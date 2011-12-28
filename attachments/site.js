@@ -411,6 +411,31 @@ views.Package = Backbone.View.extend({
     }
 });
 
+views.EditPackage = views.Package.extend({
+    render: function() {
+        var model = this.model,
+            context = this.model.renderer();
+
+        _(['resources', 'tags', 'groups']).each(function(i) {
+            context[i] = [];
+            var attr = model.get(i);
+            if (attr) {
+                attr.each(function(v) {
+                    if (i == 'resources') {
+                        context[i].push(v.renderer());
+                    }
+                    else {
+                        context[i].push(v.escape('name'));
+                    }
+                });
+            }
+        });
+
+        $(this.el).empty().html(templates.editPackage(context));
+        return this;
+    }
+});
+
 views.Filter = Backbone.View.extend({
     initialize: function() {
         _.bindAll(this, 'render', 'renderCollection');
@@ -470,11 +495,14 @@ views.Search = Backbone.View.extend({
 });
 
 var App = Backbone.Router.extend({
+    auth: true, // TODO use this flag for authentication status.
     routes: {
         '': 'home',
         'search/:keywords': 'search',
         'filter/:filter/:value': 'filter',
-        'package/:id': 'package'
+        'package/new': 'newPackage',
+        'package/:id': 'package',
+        'package/:id/edit': 'editPackage'
     },
     home: function() {
         var facets = {};

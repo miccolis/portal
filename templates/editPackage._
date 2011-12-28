@@ -1,0 +1,57 @@
+<h2>Edit / Create package</h2>
+
+<div id="main-content">
+  <div>
+    <label for='title'>Title</label>
+    <input name='title' type='textfield' value='<%= p('title') %>'></input>
+  </div>
+
+  <ul class="package-meta">
+    <% _(['url', 'download_url', 'version', 'notes']).each(function(i) {%>
+    <div>
+      <label for='<%= i %>'><%= i %></label>
+      <input name='<%= i %>' type='textfield' value='<%= p(i) %>'></input>
+    </div>
+    <% }); %>
+  </ul>
+
+  <div>Extras</div>
+
+  <div class='resources'>
+    <h3>Resources</h3>
+    <ul><% _(resources).each(function(v) { %>
+      <li><%= v.p('format') %> <%= v.p('description') %> <%= v.p('url') %></li>
+    <% }); %></ul>
+  </div>
+</div>
+
+<div id="supporting-content">
+  <ul class="package-meta">
+    <% _(['author', 'author_email', 'maintainer', 'maintainer_email', 'license']).each(function(i) {%>
+    <div>
+      <label for='<%= i %>'><%= i %></label>
+      <input name='<%= i %>' type='textfield' value='<%= p(i) %>'></input>
+    </div>
+    <% }); %>
+  </ul>
+  <h3>Tags</h3>
+  <ul class="package-tags">
+    <% _(tags).each(function(tag) { %>
+      <li><%= tag %><a class='remove-tag' href="#remove/tag/<%= tag %>">[x]</a></li>
+    <% }); %>
+  </ul>
+  <div>
+     <label for='new-tag'>New tag</label>
+     <input name='new-tag' type='textfield' value=''></input>
+  </div>
+  <h3>Groups</h3>
+  <ul class="package-groups">
+    <% _(groups).each(function(tag) { %>
+      <li><%= tag %><a href='#remove/group/<%= tag %>'>[x]</a></li>
+    <% }); %>
+  </ul>
+  <div>
+     <label for='new-group'>New group</label>
+     <input name='new-group' type='textfield' value=''></input>
+  </div>
+<div>
