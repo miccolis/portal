@@ -53,9 +53,12 @@ var models = {};
 models.Session = Backbone.Model.extend({
     url: '/api/session',
     fetch: function(options) {
+
         // Write the password into the header, and discard it.
-        // NOTE this is not working...
-        options.headers = {Authorization: 'Basic '+ btoa(this.id +':'+options.password)};
+        var header = 'Basic '+ btoa(this.id +':'+options.password);
+        options.beforeSend = function(jqXHR, settings) {
+            jqXHR.setRequestHeader('Authorization', header);
+        }
         delete options.password;
 
         Backbone.Model.prototype.fetch.call(this, options);
@@ -372,13 +375,18 @@ views.Controls = Backbone.View.extend({
         $(this.el).addClass('overlaid').append(templates.loginForm());
         ev.preventDefault();
     },
+    showLoginError: function(model, resp, options) {
+        var err = resp.status +': '+ resp.statusText;
+        // TODO better error presentation.
+        alert(err);
+    },
     sessionCreate: function() {
         var err = false;
         var username = $('input[name=username]', this.el).val()
         var password= $('input[name=password]', this.el).val()
         if (username && password ) {
             var session = new models.Session({id: username})
-            session.fetch({password: password});
+            session.fetch({password: password, error: this.showLoginError});
         }
         else {
             err = 'Please enter both a username and password';
