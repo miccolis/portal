@@ -1,57 +1,61 @@
-var request = function (options, callback) {
-  options.success = function (obj) {
-    callback(null, obj);
-  }
-  options.error = function (err) {
-    if (err) callback(err);
-    else callback(true);
-  }
-  if (options.data && typeof options.data == 'object') {
-    options.data = JSON.stringify(options.data)
-  }
-  if (!options.dataType) options.processData = false;
-  if (!options.dataType) options.contentType = 'application/json';
-  if (!options.dataType) options.dataType = 'json';
-  $.ajax(options)
-}
+// var request = function (options, callback) {
+//   options.success = function (obj) {
+//     callback(null, obj);
+//   }
+//   options.error = function (err) {
+//     if (err) callback(err);
+//     else callback(true);
+//   }
+//   if (options.data && typeof options.data == 'object') {
+//     options.data = JSON.stringify(options.data)
+//   }
+//   if (!options.dataType) options.processData = false;
+//   if (!options.dataType) options.contentType = 'application/json';
+//   if (!options.dataType) options.dataType = 'json';
+//   $.ajax(options)
+// }
+// 
+// $.expr[":"].exactly = function(obj, index, meta, stack){ 
+//   return ($(obj).text() == meta[3])
+// }
+// 
+// var param = function( a ) {
+//   // Query param builder from jQuery, had to copy out to remove conversion of spaces to +
+//   // This is important when converting datastructures to querystrings to send to CouchDB.
+//   var s = [];
+//   if ( jQuery.isArray(a) || a.jquery ) {
+//           jQuery.each( a, function() { add( this.name, this.value ); });		
+//   } else { 
+//     for ( var prefix in a ) { buildParams( prefix, a[prefix] ); }
+//   }
+//   return s.join("&");
+// 	function buildParams( prefix, obj ) {
+// 		if ( jQuery.isArray(obj) ) {
+// 			jQuery.each( obj, function( i, v ) {
+// 				if (  /\[\]$/.test( prefix ) ) { add( prefix, v );
+// 				} else { buildParams( prefix + "[" + ( typeof v === "object" || jQuery.isArray(v) ? i : "") +"]", v )}
+// 			});				
+// 		} else if (  obj != null && typeof obj === "object" ) {
+// 			jQuery.each( obj, function( k, v ) { buildParams( prefix + "[" + k + "]", v ); });				
+// 		} else { add( prefix, obj ); }
+// 	}
+// 	function add( key, value ) {
+// 		value = jQuery.isFunction(value) ? value() : value;
+// 		s[ s.length ] = encodeURIComponent(key) + "=" + encodeURIComponent(value);
+// 	}
+// }
 
-$.expr[":"].exactly = function(obj, index, meta, stack){ 
-  return ($(obj).text() == meta[3])
-}
+(function() {
 
-var param = function( a ) {
-  // Query param builder from jQuery, had to copy out to remove conversion of spaces to +
-  // This is important when converting datastructures to querystrings to send to CouchDB.
-  var s = [];
-  if ( jQuery.isArray(a) || a.jquery ) {
-          jQuery.each( a, function() { add( this.name, this.value ); });		
-  } else { 
-    for ( var prefix in a ) { buildParams( prefix, a[prefix] ); }
-  }
-  return s.join("&");
-	function buildParams( prefix, obj ) {
-		if ( jQuery.isArray(obj) ) {
-			jQuery.each( obj, function( i, v ) {
-				if (  /\[\]$/.test( prefix ) ) { add( prefix, v );
-				} else { buildParams( prefix + "[" + ( typeof v === "object" || jQuery.isArray(v) ? i : "") +"]", v )}
-			});				
-		} else if (  obj != null && typeof obj === "object" ) {
-			jQuery.each( obj, function( k, v ) { buildParams( prefix + "[" + k + "]", v ); });				
-		} else { add( prefix, obj ); }
-	}
-	function add( key, value ) {
-		value = jQuery.isFunction(value) ? value() : value;
-		s[ s.length ] = encodeURIComponent(key) + "=" + encodeURIComponent(value);
-	}
-}
-
-var rootPath = location.pathname;
+// TODO make these configurable.
+var rootURI = 'http://localhost:5984/portal/_design/app/_rewrite';
+var authURI = 'http://localhost:5984/_session';
 
 // Begin Backbone setup.
 var models = {};
 
 models.Session = Backbone.Model.extend({
-    url: '/api/session',
+    url: authURI,
     fetch: function(options) {
 
         // Write the password into the header, and discard it.
@@ -96,7 +100,7 @@ models.Schema = Backbone.Model.extend({
 
 models.Package = models.Schema.extend({
     url: function() {
-        return rootPath + '/api/' + encodeURIComponent('dataset/' + this.id);
+        return rootURI + '/api/' + encodeURIComponent('dataset/' + this.id);
     },
     parse: function(resp) {
         if (resp.resources.length) {
@@ -198,7 +202,7 @@ models.Package = models.Schema.extend({
 
 models.Packages = Backbone.Collection.extend({
     model: models.Package,
-    url: rootPath + '/api/packages',
+    url: rootURI + '/api/packages',
     parse: function(resp) {
         return _(resp.rows).pluck('doc');
     },
@@ -209,7 +213,7 @@ models.Packages = Backbone.Collection.extend({
             var pos = filters.indexOf(options.filter);
             if (pos === -1) return; // TODO Fail harder.
 
-            this.url = rootPath +'/api/filter/' + filters[pos] +'/';
+            this.url = rootURI +'/api/filter/' + filters[pos] +'/';
             this.url += encodeURIComponent(options.value);
             this.options = options;
         }
@@ -223,7 +227,7 @@ models.Resource = models.Schema.extend({
       _.bindAll(this, 'renderer');
     },
     url: function() {
-        return rootPath + this.id;
+        return rootURI + this.id;
     },
     schema: {
         name: 'package',
@@ -275,13 +279,13 @@ models.Resources = Backbone.Collection.extend({model: models.Resource});
 
 models.Facet = Backbone.Model.extend({
     url: function() {
-        return rootPath + '/api/facet/' + encodeURIComponent(this.id) +'?group=true';
+        return rootURI + '/api/facet/' + encodeURIComponent(this.id) +'?group=true';
     }
 });
 
 models.Search = Backbone.Model.extend({
     url: function() {
-        return rootPath + '/api/search';
+        return rootURI + '/api/search';
     },
     sync: function(method, model, options) {
         if (method != 'read') return options.error('Unsupported method');
@@ -321,7 +325,7 @@ models.Search = Backbone.Model.extend({
                     .value();
 
                 $.ajax({
-                    url: rootPath + '/api/packages',
+                    url: rootURI + '/api/packages',
                     type: "POST",
                     data: JSON.stringify({keys: ids}),
                     processData: false,
@@ -644,3 +648,5 @@ $(function () {
         root: location.pathname
     });
 });
+
+}());
