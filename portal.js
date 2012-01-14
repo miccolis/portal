@@ -1,14 +1,16 @@
 #!/usr/bin/env node
 
-var path = require('path'),
-    fs = require('fs'),
-    request = require('request'),
-    exec = require('child_process').exec;
+var path = require('path');
+var fs = require('fs');
+var crypto = require('crypto');
+var readline = require('readline');
+var exec = require('child_process').exec;
+var request = require('request');
 
-var node = process.argv.shift(),
-    bin = process.argv.shift(),
-    command = process.argv.shift(),
-    couch = process.argv.shift();
+var node = process.argv.shift();
+var bin = process.argv.shift();
+var command = process.argv.shift();
+var couch = process.argv.shift();
 
 if (command == 'help' || command == undefined) {
     console.log(
@@ -20,6 +22,7 @@ if (command == 'help' || command == undefined) {
       , "Commands:"
       , "  push   : Push app once to server."
       , "  import: Import testing data."
+      , "  user-add: Create a user."
       ]
       .join('\n')
     );
@@ -78,10 +81,71 @@ if (command == 'import') {
                     }, function(error, resp, body){
                         if (error) return console.error(error)
                         console.log("import complete");
-                        //console.error(resp);
                     });
                 });
             }
+        });
+    });
+}
+
+if (command =='user-add') {
+    var i = readline.createInterface(process.stdin, process.stdout);
+
+    var askName = function(callback) {
+        var allowed = /^[-_.a-zA-Z0-9]{3,}$/
+        i.question('User name: ', function(input) {
+            input = input.trim();
+            if (!allowed.test(input)) {
+                console.log('Sorry, bad user name. Try again.');
+                return askName(callback);
+            }
+            callback(input)
+        });
+    }
+
+    var askPass = function(callback) {
+        var allowed = /^[a-zA-Z0-9]{5,}$/
+        // TODO make this invisible
+        i.question('Password: ', function(input) {
+            input = input.trim();
+            if (!allowed.test(input)) {
+                console.log('Sorry. Passwords my contain letters and numbers only and must be 6 characters or longer.');
+                return askPass(callback);
+            }
+            callback(input)
+        });
+    }
+
+    askName(function(name) {
+        // TODO make sure users doesn't already exist before proceeding.
+        askPass(function(pass) {
+            i.close();
+            process.stdin.destroy();
+
+            // TODO generate a better salt, make configurable, etc.
+            var salt = '23f3fd77a464cbe250150f60d785f08978d07e40'
+            var hash = crypto.createHash('sha1');
+            hash.update(pass);
+            hash.update(salt);
+            pass = hash.digest('hex');
+
+            var record = {
+                _id:  "org.couchdb.user:" + name,
+                type: "user",
+                name: name,
+                roles: ['portal'], // TODO tie this to the instance.
+                password: pass,
+                salt: salt
+            };
+
+            request({
+                uri: couch,
+                method: 'POST',
+                json: record
+            }, function(error, resp, body){
+                if (error) return console.error(error)
+                console.log("Created user");
+            });
         });
     });
 }
