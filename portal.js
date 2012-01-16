@@ -134,7 +134,7 @@ if (command =='user-add') {
                 type: "user",
                 name: name,
                 roles: ['portal'], // TODO tie this to the instance.
-                password: pass,
+                password_sha: pass,
                 salt: salt
             };
 
