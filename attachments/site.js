@@ -419,13 +419,13 @@ views.Controls = Backbone.View.extend({
             this.app.session.save({
                 name: username,
                 password: password
+            },{
+                error: this.showLoginError,
+                success: this.render,
             });
-            //var session = new models.Session({id: username})
-            //session.fetch({password: password, error: this.showLoginError});
         }
         else {
             err = 'Please enter both a username and password';
-            // TODO better error presentation.
             alert(err);
         }
     },

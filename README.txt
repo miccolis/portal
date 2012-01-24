@@ -21,6 +21,13 @@ Once you have the application "pushed" you can access it at a URI like:
     http://localhost:5984/portal/_design/app/_rewrite
 
 
+CouchDB configuration
+---------------------
+
+1. (?) enable the cookie authentication handler
+2. (?) add a `secret = ` line to the [httpd] of local.ini
+
+
 User management
 ---------------
 
