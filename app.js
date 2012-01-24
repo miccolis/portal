@@ -28,7 +28,7 @@ ddoc = {
           query: {reduce: 'false', include_docs: 'true'}
         },
         {from:"/api/session", to:'../../_session'},
-        //{from:"/api/*", to:'../../*'},
+        {from:"/api/*", to:'../../*'},
         {from:"/*", to:'*'},
     ]
 };

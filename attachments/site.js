@@ -51,13 +51,13 @@
 var rootURI = 'http://localhost:5984/portal/_design/app/_rewrite';
 var authURI = 'http://localhost:5984/_session';
 
+
 // Begin Backbone setup.
 var models = {};
 
 models.Session = Backbone.Model.extend({
     url: authURI,
     parse: function(resp) {
-            debugger;
         if (typeof resp == 'object') {
             // from read we get an object here...
             if (resp.ok && resp.userCtx) return resp.userCtx;
@@ -376,10 +376,15 @@ views.Controls = Backbone.View.extend({
     },
     initialize: function(options) {
         this.app = options.app;
+        _(this).bindAll('update', 'controls', 'render');
+    },
+    update: function(view) {
+        this.pageView = view;
+        return this;
     },
     controls: function() {
         var links = [];
-        if (this.app.auth) {
+        if (this.app.session.isAuth()) {
             links.push({name: 'Logout', link: 'logout', klass: 'logout'});
         }
         else {
@@ -387,11 +392,11 @@ views.Controls = Backbone.View.extend({
         }
         return {links: links};
     },
-    render: function(view) {
+    render: function() {
         var context = this.controls();
 
         // Allow views to add thier own business.
-        if (view && view.controls !== undefined) {
+        if (this.pageView && this.pageView.controls !== undefined) {
             context = _(context).extend(view.controls());
         }
 
@@ -404,7 +409,6 @@ views.Controls = Backbone.View.extend({
     },
     showLoginError: function(model, resp, options) {
         var err = resp.status +': '+ resp.statusText;
-        // TODO better error presentation.
         alert(err);
     },
     sessionCreate: function() {
@@ -604,14 +608,16 @@ var App = Backbone.Router.extend({
     initialize: function(options) {
         this.session = options.session;
 
-        this.session.fetch();
         this.controls = new views.Controls({
             el: $('#controls'),
             app: this
         });
+        this.session.fetch({
+            success: this.controls.render
+        });
     },
     update: function(view) {
-        this.controls.render(view);
+        this.controls.update(view).render();
     },
     routes: {
         '': 'home',
@@ -657,13 +663,13 @@ var App = Backbone.Router.extend({
         model.fetch();
     },
     newPackage: function() {
-        if (this.auth) {
+        if (this.session.isAuth()) {
             var model = new models.Package({id: 'new'});
             this.update(new views.EditPackage({el: $('#main'), model: model}));
         }
     },
     editPackage: function(id) {
-        if (this.auth) {
+        if (this.session.isAuth()) {
             var model = new models.Package({id:id});
             this.update(new views.EditPackage({el: $('#main'), model: model}));
             model.fetch();
