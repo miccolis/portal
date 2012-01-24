@@ -51,11 +51,11 @@
 var rootURI = 'http://localhost:5984/portal/_design/app/_rewrite';
 var authURI = 'http://localhost:5984/_session';
 
-
 // Begin Backbone setup.
 var models = {};
 
 models.Session = Backbone.Model.extend({
+    idAttribute: 'name',
     url: authURI,
     parse: function(resp) {
         if (typeof resp == 'object') {
@@ -67,7 +67,6 @@ models.Session = Backbone.Model.extend({
             resp = JSON.parse(resp);
             return {name: resp.name, roles: resp.roles};
         }
-
         return {};
     },
     isAuth: function() {
@@ -76,10 +75,16 @@ models.Session = Backbone.Model.extend({
     sync: function(method, model, options) {
         switch (method) {
         case 'read':
-        case 'update':
+            return Backbone.sync.call(model, method, model, options)
         case 'delete':
+            var success = options.success || function() {};
+            options.success = function(resp, status, xhr) {
+                this.clear({silent: true});
+                success(resp, status, xhr);
+            }
             return Backbone.sync.call(model, method, model, options)
 
+        case 'update':
         case 'create':
             options.type = 'POST';
             options.url = this.url;
@@ -429,10 +434,11 @@ views.Controls = Backbone.View.extend({
             alert(err);
         }
     },
-    sessionDestroy: function() {
-        // Delete the session...
-        // remove the cookie...
-        // this.render();
+    sessionDestroy: function(ev) {
+        ev.preventDefault();
+        this.app.session.destroy({
+            success: this.render
+        });
     }
 });
 
