@@ -56,16 +56,39 @@ var models = {};
 
 models.Session = Backbone.Model.extend({
     url: authURI,
-    fetch: function(options) {
-
-        // Write the password into the header, and discard it.
-        var header = 'Basic '+ btoa(this.id +':'+options.password);
-        options.beforeSend = function(jqXHR, settings) {
-            jqXHR.setRequestHeader('Authorization', header);
+    parse: function(resp) {
+            debugger;
+        if (typeof resp == 'object') {
+            // from read we get an object here...
+            if (resp.ok && resp.userCtx) return resp.userCtx;
         }
-        delete options.password;
+        else {
+            // on created a string...
+            resp = JSON.parse(resp);
+            return {name: resp.name, roles: resp.roles};
+        }
 
-        Backbone.Model.prototype.fetch.call(this, options);
+        return {};
+    },
+    isAuth: function() {
+        return !!(this.get('name'));
+    },
+    sync: function(method, model, options) {
+        switch (method) {
+        case 'read':
+        case 'update':
+        case 'delete':
+            return Backbone.sync.call(model, method, model, options)
+
+        case 'create':
+            options.type = 'POST';
+            options.url = this.url;
+            options.data = {
+                name: model.get('name'),
+                password: model.get('password')
+            };
+            return $.ajax(options);
+        }
     }
 });
 
@@ -389,8 +412,12 @@ views.Controls = Backbone.View.extend({
         var username = $('input[name=username]', this.el).val()
         var password= $('input[name=password]', this.el).val()
         if (username && password ) {
-            var session = new models.Session({id: username})
-            session.fetch({password: password, error: this.showLoginError});
+            this.app.session.save({
+                name: username,
+                password: password
+            });
+            //var session = new models.Session({id: username})
+            //session.fetch({password: password, error: this.showLoginError});
         }
         else {
             err = 'Please enter both a username and password';
@@ -574,8 +601,10 @@ views.Search = Backbone.View.extend({
 });
 
 var App = Backbone.Router.extend({
-    auth: false, // TODO use this flag for authentication status.
-    initialize: function() {
+    initialize: function(options) {
+        this.session = options.session;
+
+        this.session.fetch();
         this.controls = new views.Controls({
             el: $('#controls'),
             app: this
@@ -643,7 +672,10 @@ var App = Backbone.Router.extend({
 });
 
 $(function () { 
-    new App();
+    new App({
+        session: new models.Session()
+    });
+
     Backbone.history.start({
         root: location.pathname
     });
