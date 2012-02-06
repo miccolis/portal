@@ -77,9 +77,10 @@ models.Session = Backbone.Model.extend({
         case 'read':
             return Backbone.sync.call(model, method, model, options)
         case 'delete':
+            this.clear({silent: true});
+
             var success = options.success || function() {};
             options.success = function(resp, status, xhr) {
-                this.clear({silent: true});
                 success(resp, status, xhr);
             }
             return Backbone.sync.call(model, method, model, options)
@@ -375,30 +376,23 @@ var views = {};
 
 views.Controls = Backbone.View.extend({
     events: {
-        'click a.login': 'toggleLoginForm',
+        'click a.control-toggle': 'toggleControls',
         'click input.login': 'sessionCreate',
         'click a.logout': 'sessionDestroy'
     },
     initialize: function(options) {
         this.app = options.app;
-        _(this).bindAll('update', 'controls', 'render');
+        _(this).bindAll('update', 'render');
     },
     update: function(view) {
         this.pageView = view;
         return this;
     },
-    controls: function() {
-        var links = [];
-        if (this.app.session.isAuth()) {
-            links.push({name: 'Logout', link: 'logout', klass: 'logout'});
-        }
-        else {
-            links.push({name: 'Login', link: 'login', klass: 'login'});
-        }
-        return {links: links};
-    },
     render: function() {
-        var context = this.controls();
+        var context = {
+            anon: !this.app.session.isAuth(),
+            links: []
+        };
 
         // Allow views to add thier own business.
         if (this.pageView && this.pageView.controls !== undefined) {
@@ -408,9 +402,9 @@ views.Controls = Backbone.View.extend({
         $(this.el).empty().append(templates.controls(context));
         return this;
     },
-    toggleLoginForm: function(ev) {
-        $(this.el).addClass('overlaid').append(templates.loginForm());
+    toggleControls: function(ev) {
         ev.preventDefault();
+        $(this.el).toggleClass('show-controls');
     },
     showLoginError: function(model, resp, options) {
         var err = resp.status +': '+ resp.statusText;

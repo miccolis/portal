@@ -53,9 +53,8 @@ h2 {
   background: #aaa;
 }
 
-#controls.overlaid ul {
-  display: none;
-}
+#controls > div { display: none; }
+#controls.show-controls > div { display: block; }
 
 /* Forms */
 .form-elems { float: left; }
